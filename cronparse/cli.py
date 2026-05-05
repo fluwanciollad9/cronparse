@@ -29,6 +29,19 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _format_output(expr: CronExpression, fmt: str) -> str:
+    """Return the formatted string for the given expression and format name."""
+    if fmt == "human":
+        return humanize(expr)
+    elif fmt == "json":
+        return to_json(expr)
+    elif fmt == "table":
+        return to_table(expr)
+    elif fmt == "cron":
+        return to_cron_string(expr)
+    raise ValueError(f"Unknown format: {fmt}")
+
+
 def run(argv=None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
@@ -39,15 +52,7 @@ def run(argv=None) -> int:
         print(f"Error: {exc}", file=sys.stderr)
         return 1
 
-    fmt = args.format
-    if fmt == "human":
-        print(humanize(expr))
-    elif fmt == "json":
-        print(to_json(expr))
-    elif fmt == "table":
-        print(to_table(expr))
-    elif fmt == "cron":
-        print(to_cron_string(expr))
+    print(_format_output(expr, args.format))
 
     if args.check_conflicts:
         report: ConflictReport = has_conflicts(expr)
