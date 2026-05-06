@@ -63,6 +63,17 @@ def test_validate_field_list_mixed():
     assert len(errors) == 1
 
 
+def test_validate_field_list_all_valid():
+    # All values within range for hours
+    assert validate_field("0,6,12,18,23", "hour") == []
+
+
+def test_validate_field_list_multiple_errors():
+    # Both 60 and 70 are out of range for minutes
+    errors = validate_field("0,60,70", "minute")
+    assert len(errors) == 2
+
+
 # ---------------------------------------------------------------------------
 # validate (full expression)
 # ---------------------------------------------------------------------------
