@@ -1,26 +1,35 @@
-"""cronparse — Library for parsing and humanizing cron expressions."""
+"""cronparse — Library for parsing and humanizing cron expressions with conflict detection."""
 
-from .parser import CronExpression, ParseError
+from .parser import CronExpression, CronField, ParseError, parse, as_dict
 from .humanizer import humanize
-from .conflicts import has_conflicts, ConflictReport
-from .validator import validate
+from .conflicts import ConflictReport, detect_conflicts
+from .validator import ValidationResult, validate
 from .formatter import to_dict, to_json, to_table, to_cron_string
 from .schedule import next_run, next_n_runs
-from .diff import diff, CronDiff
+from .diff import CronDiff, diff
 from .explainer import explain, explain_text
 from .normalizer import normalize, normalize_string
-from .similarity import compare as compare_similarity, similarity_score, SimilarityReport
+from .similarity import SimilarityReport, compare
+from .merger import MergeResult, merge, merge_strings
+from .tags import TagResult, tag, tag_string
+from .summarizer import ExpressionSummary, MultiSummary, summarize
+from .reporter import ExpressionReport, report
+from .ranker import RankResult, RankedExpression, rank
 
 __all__ = [
     # parser
     "CronExpression",
+    "CronField",
     "ParseError",
+    "parse",
+    "as_dict",
     # humanizer
     "humanize",
     # conflicts
-    "has_conflicts",
     "ConflictReport",
+    "detect_conflicts",
     # validator
+    "ValidationResult",
     "validate",
     # formatter
     "to_dict",
@@ -31,8 +40,8 @@ __all__ = [
     "next_run",
     "next_n_runs",
     # diff
-    "diff",
     "CronDiff",
+    "diff",
     # explainer
     "explain",
     "explain_text",
@@ -40,7 +49,25 @@ __all__ = [
     "normalize",
     "normalize_string",
     # similarity
-    "compare_similarity",
-    "similarity_score",
     "SimilarityReport",
+    "compare",
+    # merger
+    "MergeResult",
+    "merge",
+    "merge_strings",
+    # tags
+    "TagResult",
+    "tag",
+    "tag_string",
+    # summarizer
+    "ExpressionSummary",
+    "MultiSummary",
+    "summarize",
+    # reporter
+    "ExpressionReport",
+    "report",
+    # ranker
+    "RankResult",
+    "RankedExpression",
+    "rank",
 ]
