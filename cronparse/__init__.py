@@ -1,36 +1,35 @@
 """cronparse — Library for parsing and humanizing cron expressions with conflict detection."""
 
-from .parser import CronExpression, CronField, ParseError, parse, as_dict
-from .humanizer import humanize
-from .conflicts import ConflictReport, detect_conflicts
-from .validator import ValidationResult, validate
-from .formatter import to_dict, to_json, to_table, to_cron_string
-from .schedule import next_run, next_n_runs
-from .diff import CronDiff, diff
-from .explainer import explain, explain_text
-from .normalizer import normalize, normalize_string
-from .similarity import SimilarityReport, compare
-from .merger import MergeResult, merge, merge_strings
-from .tags import TagResult, tag, tag_string
-from .summarizer import ExpressionSummary, MultiSummary, summarize
-from .reporter import ExpressionReport, report
-from .ranker import RankResult, RankedExpression, rank
+from cronparse.parser import CronExpression, CronField, ParseError, as_dict
+from cronparse.humanizer import humanize
+from cronparse.validator import validate_field, validate
+from cronparse.conflicts import detect_conflicts
+from cronparse.formatter import to_dict, to_json, to_table, to_cron_string
+from cronparse.schedule import next_run, next_n_runs
+from cronparse.diff import diff, CronDiff
+from cronparse.explainer import explain, explain_text
+from cronparse.normalizer import normalize, normalize_string
+from cronparse.similarity import compare, SimilarityReport
+from cronparse.merger import merge, merge_strings, MergeResult
+from cronparse.tags import tag, tag_string, TagResult
+from cronparse.summarizer import summarize, ExpressionSummary, MultiSummary
+from cronparse.reporter import report, ExpressionReport
+from cronparse.ranker import rank, RankResult, RankedExpression
+from cronparse.deduplicator import deduplicate, DeduplicationResult
 
 __all__ = [
     # parser
     "CronExpression",
     "CronField",
     "ParseError",
-    "parse",
     "as_dict",
     # humanizer
     "humanize",
-    # conflicts
-    "ConflictReport",
-    "detect_conflicts",
     # validator
-    "ValidationResult",
+    "validate_field",
     "validate",
+    # conflicts
+    "detect_conflicts",
     # formatter
     "to_dict",
     "to_json",
@@ -40,8 +39,8 @@ __all__ = [
     "next_run",
     "next_n_runs",
     # diff
-    "CronDiff",
     "diff",
+    "CronDiff",
     # explainer
     "explain",
     "explain_text",
@@ -49,25 +48,28 @@ __all__ = [
     "normalize",
     "normalize_string",
     # similarity
-    "SimilarityReport",
     "compare",
+    "SimilarityReport",
     # merger
-    "MergeResult",
     "merge",
     "merge_strings",
+    "MergeResult",
     # tags
-    "TagResult",
     "tag",
     "tag_string",
+    "TagResult",
     # summarizer
+    "summarize",
     "ExpressionSummary",
     "MultiSummary",
-    "summarize",
     # reporter
-    "ExpressionReport",
     "report",
+    "ExpressionReport",
     # ranker
+    "rank",
     "RankResult",
     "RankedExpression",
-    "rank",
+    # deduplicator
+    "deduplicate",
+    "DeduplicationResult",
 ]
