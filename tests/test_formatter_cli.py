@@ -93,6 +93,14 @@ def test_cli_invalid_expression(capsys):
     assert ret == 1
 
 
+def test_cli_invalid_expression_prints_error(capsys):
+    """Ensure that an invalid expression produces a non-empty error message on stderr."""
+    ret = run(["invalid expression here"])
+    assert ret == 1
+    captured = capsys.readouterr()
+    assert len(captured.err.strip()) > 0
+
+
 def test_cli_check_conflicts_no_issues(capsys):
     ret = run(["0 12 * * *", "--check-conflicts"])
     assert ret == 0
