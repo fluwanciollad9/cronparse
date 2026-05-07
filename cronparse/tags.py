@@ -31,6 +31,20 @@ class TagResult:
         return f"Tags: {tag_str}"
 
 
+def _parse_hour_list(h: str) -> list[int] | None:
+    """Parse a comma-separated hour field into a list of ints.
+
+    Returns None if the field contains wildcards or step expressions
+    that cannot be interpreted as a plain list of hours.
+    """
+    if "*" in h or "/" in h or "-" in h:
+        return None
+    try:
+        return [int(x) for x in h.split(",")]
+    except ValueError:
+        return None
+
+
 def tag(expr: CronExpression) -> TagResult:
     """Assign semantic tags to a cron expression."""
     tags = []
@@ -69,14 +83,11 @@ def tag(expr: CronExpression) -> TagResult:
         tags.append("yearly")
         labels["frequency"] = "yearly"
 
-    if h != "*" and not h.startswith("*"):
-        try:
-            hours = [int(x) for x in h.split(",")]
-            if all(9 <= hr <= 17 for hr in hours):
-                tags.append("business_hours")
-                labels["context"] = "business hours"
-        except ValueError:
-            pass
+    if h != "*":
+        hours = _parse_hour_list(h)
+        if hours is not None and all(9 <= hr <= 17 for hr in hours):
+            tags.append("business_hours")
+            labels["context"] = "business hours"
 
     if not tags:
         tags.append("custom")
