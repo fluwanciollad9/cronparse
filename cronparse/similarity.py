@@ -82,3 +82,23 @@ def compare(expr_a: CronExpression, expr_b: CronExpression) -> SimilarityReport:
 def similarity_score(expr_a: CronExpression, expr_b: CronExpression) -> float:
     """Return a single float in [0, 1] representing overall similarity."""
     return compare(expr_a, expr_b).overall
+
+
+def most_similar(
+    target: CronExpression, candidates: list
+) -> CronExpression:
+    """Return the candidate CronExpression most similar to *target*.
+
+    Args:
+        target: The reference cron expression to compare against.
+        candidates: A non-empty list of CronExpression objects to search.
+
+    Returns:
+        The element of *candidates* with the highest similarity score.
+
+    Raises:
+        ValueError: If *candidates* is empty.
+    """
+    if not candidates:
+        raise ValueError("candidates list must not be empty")
+    return max(candidates, key=lambda c: similarity_score(target, c))
