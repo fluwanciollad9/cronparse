@@ -1,72 +1,91 @@
 """Command-line interface for cronparse."""
 
 import argparse
+import json
 import sys
+from typing import List, Optional
 
-from cronparse.parser import CronExpression, ParseError
+from cronparse.parser import ParseError, parse
 from cronparse.humanizer import humanize
-from cronparse.conflicts import has_conflicts, has_warnings, ConflictReport
-from cronparse.formatter import to_json, to_table, to_cron_string
+from cronparse.formatter import to_dict, to_json, to_table, to_cron_string
+from cronparse.validator import validate
+from cronparse.conflicts import detect_conflicts
+from cronparse.classifier import classify
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
+    p = argparse.ArgumentParser(
         prog="cronparse",
-        description="Parse, humanize, and validate cron expressions.",
+        description="Parse, humanize, validate, and classify cron expressions.",
     )
-    parser.add_argument("expression", help="Cron expression to process (5 fields)")
-    parser.add_argument(
+    p.add_argument("expression", nargs="+", help="One or more cron expressions.")
+    p.add_argument(
         "--format",
-        choices=["human", "json", "table", "cron"],
+        choices=["human", "dict", "json", "table", "cron", "classify"],
         default="human",
-        help="Output format (default: human)",
+        help="Output format (default: human).",
     )
-    parser.add_argument(
-        "--check-conflicts",
-        action="store_true",
-        help="Report any conflicts or warnings in the expression",
-    )
-    return parser
+    p.add_argument("--validate", action="store_true", help="Validate each expression.")
+    p.add_argument("--conflicts", action="store_true", help="Detect conflicts across expressions.")
+    return p
 
 
-def _format_output(expr: CronExpression, fmt: str) -> str:
-    """Return the formatted string for the given expression and format name."""
+def _format_output(expression: str, fmt: str) -> str:
+    try:
+        expr = parse(expression)
+    except ParseError as exc:
+        return f"ERROR: {exc}"
+
     if fmt == "human":
         return humanize(expr)
-    elif fmt == "json":
+    if fmt == "dict":
+        return str(to_dict(expr))
+    if fmt == "json":
         return to_json(expr)
-    elif fmt == "table":
+    if fmt == "table":
         return to_table(expr)
-    elif fmt == "cron":
+    if fmt == "cron":
         return to_cron_string(expr)
-    raise ValueError(f"Unknown format: {fmt}")
+    if fmt == "classify":
+        result = classify(expression)
+        return result.category if result.valid else f"ERROR: {result.error}"
+    return humanize(expr)
 
 
-def run(argv=None) -> int:
+def run(args: Optional[List[str]] = None) -> int:
     parser = build_parser()
-    args = parser.parse_args(argv)
+    ns = parser.parse_args(args)
 
-    try:
-        expr = CronExpression(args.expression)
-    except ParseError as exc:
-        print(f"Error: {exc}", file=sys.stderr)
-        return 1
+    exit_code = 0
 
-    print(_format_output(expr, args.format))
+    if ns.validate:
+        for expr_str in ns.expression:
+            result = validate(expr_str)
+            status = "OK" if result else "INVALID"
+            print(f"{expr_str!r}: {status}")
+            if not result:
+                print(f"  {result}")
+                exit_code = 1
+        return exit_code
 
-    if args.check_conflicts:
-        report: ConflictReport = has_conflicts(expr)
-        if has_warnings(report):
-            print("\nWarnings / Conflicts detected:", file=sys.stderr)
-            print(str(report), file=sys.stderr)
-            return 2
+    if ns.conflicts:
+        try:
+            exprs = [parse(e) for e in ns.expression]
+            report = detect_conflicts(exprs)
+            print(str(report))
+            if report.has_conflicts():
+                exit_code = 1
+        except ParseError as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            exit_code = 2
+        return exit_code
 
-    return 0
+    for expr_str in ns.expression:
+        output = _format_output(expr_str, ns.format)
+        print(output)
+
+    return exit_code
 
 
-def main():
+def main() -> None:
     sys.exit(run())
-
-
-if __name__ == "__main__":
-    main()

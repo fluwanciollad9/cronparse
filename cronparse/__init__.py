@@ -1,87 +1,87 @@
-"""cronparse — Library for parsing and humanizing cron expressions."""
+"""cronparse — Library for parsing and humanizing cron expressions with conflict detection."""
 
-from .annotator import annotate
-from .conflicts import detect_conflicts
-from .deduplicator import deduplicate
-from .diff import diff
-from .explainer import explain, explain_text
-from .forecaster import forecast
-from .formatter import to_dict, to_json, to_table, to_cron_string
-from .grouper import group
-from .humanizer import humanize
-from .linter import lint
-from .matcher import match, match_any
-from .merger import merge, merge_strings
-from .normalizer import normalize, normalize_string
-from .optimizer import optimize
-from .parser import CronExpression, ParseError, parse
-from .ranker import rank
-from .reporter import report
-from .schedule import next_run, next_n_runs
-from .similarity import compare
-from .splitter import split
-from .summarizer import summarize
-from .tags import tag
-from .timeline import build_timeline
-from .validator import validate
+from cronparse.parser import CronExpression, CronField, ParseError, parse, as_dict
+from cronparse.humanizer import humanize
+from cronparse.conflicts import ConflictReport, detect_conflicts
+from cronparse.formatter import to_dict, to_json, to_table, to_cron_string
+from cronparse.validator import validate, ValidationResult
+from cronparse.schedule import next_run, next_n_runs
+from cronparse.diff import diff, CronDiff
+from cronparse.explainer import explain, explain_text
+from cronparse.normalizer import normalize, normalize_string
+from cronparse.similarity import compare, SimilarityReport
+from cronparse.merger import merge, merge_strings, MergeResult
+from cronparse.tags import tag, TagResult
+from cronparse.summarizer import summarize, MultiSummary
+from cronparse.reporter import report, ExpressionReport
+from cronparse.ranker import rank, RankResult
+from cronparse.deduplicator import deduplicate, DeduplicationResult
+from cronparse.grouper import group, GroupResult
+from cronparse.linter import lint, LintResult
+from cronparse.annotator import annotate, AnnotationResult
+from cronparse.splitter import split, SplitResult
+from cronparse.forecaster import forecast, ForecastResult
+from cronparse.timeline import build_timeline, Timeline
+from cronparse.optimizer import optimize, OptimizeResult
+from cronparse.matcher import match, BatchMatchResult
+from cronparse.classifier import classify, classify_many, ClassificationResult, BatchClassification
 
 __all__ = [
-    # parser
     "CronExpression",
+    "CronField",
     "ParseError",
     "parse",
-    # humanizer
+    "as_dict",
     "humanize",
-    # conflicts
+    "ConflictReport",
     "detect_conflicts",
-    # formatter
     "to_dict",
     "to_json",
     "to_table",
     "to_cron_string",
-    # validator
     "validate",
-    # schedule
+    "ValidationResult",
     "next_run",
     "next_n_runs",
-    # diff
     "diff",
-    # explainer
+    "CronDiff",
     "explain",
     "explain_text",
-    # normalizer
     "normalize",
     "normalize_string",
-    # similarity
     "compare",
-    # merger
+    "SimilarityReport",
     "merge",
     "merge_strings",
-    # tags
+    "MergeResult",
     "tag",
-    # summarizer
+    "TagResult",
     "summarize",
-    # reporter
+    "MultiSummary",
     "report",
-    # ranker
+    "ExpressionReport",
     "rank",
-    # deduplicator
+    "RankResult",
     "deduplicate",
-    # grouper
+    "DeduplicationResult",
     "group",
-    # linter
+    "GroupResult",
     "lint",
-    # annotator
+    "LintResult",
     "annotate",
-    # splitter
+    "AnnotationResult",
     "split",
-    # forecaster
+    "SplitResult",
     "forecast",
-    # timeline
+    "ForecastResult",
     "build_timeline",
-    # optimizer
+    "Timeline",
     "optimize",
-    # matcher
+    "OptimizeResult",
     "match",
-    "match_any",
+    "BatchMatchResult",
+    "classify",
+    "classify_many",
+    "ClassificationResult",
+    "BatchClassification",
 ]
