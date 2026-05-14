@@ -31,6 +31,10 @@ class SplitResult:
     def error_count(self) -> int:
         return len(self.errors)
 
+    def get_bucket(self, name: str) -> List[str]:
+        """Return expressions in the named bucket, or an empty list if it doesn't exist."""
+        return self.buckets.get(name, [])
+
 
 def _classify(expr: CronExpression) -> str:
     """Classify a parsed cron expression into a frequency bucket name."""
