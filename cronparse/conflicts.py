@@ -36,6 +36,30 @@ def _field_values_in_range(f, lo, hi):
     return True
 
 
+# Mapping of month number to (name, max_days) for conflict messages
+_MONTH_MAX_DAYS = {
+    1: ("January", 31), 2: ("February", 28), 3: ("March", 31),
+    4: ("April", 30), 5: ("May", 31), 6: ("June", 30),
+    7: ("July", 31), 8: ("August", 31), 9: ("September", 30),
+    10: ("October", 31), 11: ("November", 30), 12: ("December", 31),
+}
+
+
+def _check_dom_month_conflicts(dom, month, report: ConflictReport) -> None:
+    """Append errors for day-of-month values that cannot exist in the given months."""
+    if not month.values or not dom.values:
+        return
+    for m in sorted(month.values):
+        if m not in _MONTH_MAX_DAYS:
+            continue
+        month_name, max_days = _MONTH_MAX_DAYS[m]
+        impossible = {d for d in dom.values if d > max_days}
+        if impossible:
+            report.errors.append(
+                f"Day(s) {sorted(impossible)} do not exist in {month_name} (month {m})."
+            )
+
+
 def detect_conflicts(expression: CronExpression) -> ConflictReport:
     """Analyse a CronExpression and return a ConflictReport."""
     raw = " ".join([
@@ -47,29 +71,11 @@ def detect_conflicts(expression: CronExpression) -> ConflictReport:
     ])
     report = ConflictReport(expression=raw)
 
-    # Feb 30/31 — impossible date
-    dom = expression.day_of_month
-    month = expression.month
-    if month.values and dom.values:
-        feb_only = month.values == {2}
-        impossible_days = {d for d in dom.values if d > 28}
-        if feb_only and impossible_days:
-            report.errors.append(
-                f"Day(s) {sorted(impossible_days)} do not exist in February."
-            )
-
-    # Day 31 in months with 30 days
-    short_months = {4, 6, 9, 11}
-    if month.values and dom.values:
-        bad = month.values & short_months
-        if bad and 31 in dom.values:
-            names = ", ".join(str(m) for m in sorted(bad))
-            report.errors.append(
-                f"Day 31 does not exist in month(s): {names}."
-            )
+    # Check all month/day-of-month combinations for impossible dates
+    _check_dom_month_conflicts(expression.day_of_month, expression.month, report)
 
     # Both DOM and DOW restricted — ambiguous semantics
-    if not dom.wildcard and not expression.day_of_week.wildcard:
+    if not expression.day_of_month.wildcard and not expression.day_of_week.wildcard:
         report.warnings.append(
             "Both day-of-month and day-of-week are restricted; "
             "most cron implementations use OR semantics which may be unintended."
