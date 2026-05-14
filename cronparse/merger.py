@@ -18,9 +18,21 @@ class MergeResult:
             parts.append("Conflicts: " + "; ".join(self.conflicts))
         return "\n".join(parts)
 
+    @property
+    def has_conflicts(self) -> bool:
+        """Return True if there are any merge conflicts."""
+        return bool(self.conflicts)
+
 
 def _merge_field(field_a: str, field_b: str) -> tuple[str, Optional[str]]:
-    """Merge two field expressions. Returns (merged, conflict_message)."""
+    """Merge two field expressions. Returns (merged, conflict_message).
+
+    Merging rules:
+    - If both fields are identical, return as-is.
+    - If either field is '*' (wildcard), prefer the more specific field.
+    - If both fields are simple comma-separated values, union them.
+    - If either field contains a range ('-') or step ('/'), report a conflict.
+    """
     if field_a == field_b:
         return field_a, None
     if field_a == "*":
