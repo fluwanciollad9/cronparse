@@ -83,3 +83,12 @@ def test_group_result_str_contains_errors():
     text = str(result)
     assert "[errors]" in text
     assert "bad_expr" in text
+
+
+def test_group_by_dom():
+    """Test grouping by day-of-month field."""
+    result = group(["0 9 1 * *", "0 10 1 * *", "0 9 15 * *"], by="dom")
+    assert "1" in result.groups
+    assert len(result.groups["1"]) == 2
+    assert "15" in result.groups
+    assert result.group_count == 2
