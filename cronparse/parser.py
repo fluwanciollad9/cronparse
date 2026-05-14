@@ -54,6 +54,16 @@ def _resolve_alias(value: str, field_name: str) -> str:
     return value
 
 
+def _parse_int(value: str, field_name: str, context: str) -> int:
+    """Parse an integer from a string, raising ParseError on failure."""
+    try:
+        return int(value)
+    except ValueError:
+        raise ParseError(
+            f"Expected an integer in field '{field_name}', got '{value}' in '{context}'"
+        )
+
+
 def _parse_field(raw: str, field_name: str) -> List[int]:
     min_val, max_val = FIELD_RANGES[field_name]
     values = set()
@@ -64,19 +74,19 @@ def _parse_field(raw: str, field_name: str) -> List[int]:
             values.update(range(min_val, max_val + 1))
         elif "/" in part:
             base, step_str = part.split("/", 1)
-            step = int(step_str)
+            step = _parse_int(step_str, field_name, part)
             if step <= 0:
                 raise ParseError(f"Step must be positive in field '{field_name}': {part}")
-            start = min_val if base == "*" else int(base)
+            start = min_val if base == "*" else _parse_int(base, field_name, part)
             values.update(range(start, max_val + 1, step))
         elif "-" in part:
             start_str, end_str = part.split("-", 1)
-            start, end = int(start_str), int(end_str)
+            start, end = _parse_int(start_str, field_name, part), _parse_int(end_str, field_name, part)
             if start > end:
                 raise ParseError(f"Invalid range in field '{field_name}': {part}")
             values.update(range(start, end + 1))
         else:
-            values.add(int(part))
+            values.add(_parse_int(part, field_name, part))
 
     out_of_range = [v for v in values if not (min_val <= v <= max_val)]
     if out_of_range:
